@@ -1,0 +1,22 @@
+{
+    "users": [
+      {
+        "user_id": 1,
+        "username": "Laptop",
+        "surname": "asd",
+        "isactive": true
+      },
+      {
+        "user_id": 2,
+        "username": "Laptop",
+        "surname": "ASD",
+        "isactive": true
+      },
+      {
+        "user_id": 3,
+        "username": "Laptop",
+        "surname": "ASDAS",
+        "isactive": true
+      }     
+    ]    
+  }
