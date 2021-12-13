@@ -28,9 +28,44 @@ func HandleUsers(us model.User) http.HandlerFunc {
 func HandleUpdate(us model.User) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		user := model.User{UserId: 2, UserName: "msk", Surname: "Kocatepe"}
+		id := chi.URLParam(r, "id")
 
-		render.JSON(w, user, http.StatusOK)
+		if len(id) == 0 {
+			render.BadRequest(w, errors.New(""))
+			return
+		}
+
+		var req updateUserRequest
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			render.BadRequest(w, err)
+			return
+		}
+		defer r.Body.Close()
+
+		if err := json.Unmarshal(body, &req); err != nil {
+			render.BadRequest(w, err)
+			return
+		}
+
+		var user model.User
+
+		if len(req.Username) != 0 {
+			user.UserName = req.Username
+		}
+
+		if len(req.Surname) != 0 {
+			user.Surname = req.Surname
+		}
+
+		result := userService.UpdateUserByUserId(model.UserArray, id, user)
+
+		if !result {
+			render.NotFound(w, errors.New("Kullanici bulunamadi"))
+			return
+		}
+
+		render.JSON(w, "", http.StatusNoContent)
 	}
 }
 
@@ -120,7 +155,7 @@ func HandleUpdateUserName(us model.User) http.HandlerFunc {
 			return
 		}
 
-		var req updateUserRequest
+		var req updateUserNameRequest
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			render.BadRequest(w, err)

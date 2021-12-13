@@ -26,7 +26,7 @@ func (s Server) Handler() http.Handler {
 		r.Get("/", user.HandleUsers(s.Users))
 		r.Get("/{username}", user.HandleUser(s.Users))
 		r.Patch("/{id}", user.HandleUpdateUserName(s.Users))
-		r.Put("/", user.HandleUpdate(s.Users))
+		r.Put("/{id}", user.HandleUpdate(s.Users))
 		r.Delete("/{id}", user.HandleDelete(s.Users))
 	})
 

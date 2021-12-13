@@ -43,3 +43,22 @@ func UpdateUserNameByUserId(slice []model.User, val string, userName string) boo
 	}
 	return false
 }
+
+func UpdateUserByUserId(slice []model.User, val string, user model.User) bool {
+	for i, item := range slice {
+		value, _ := strconv.Atoi(val)
+		if item.UserId == value && item.IsActive {
+
+			if len(user.UserName) != 0 {
+				(model.UserArray[i]).UserName = user.UserName
+			}
+
+			if len(user.Surname) != 0 {
+				(model.UserArray[i]).Surname = user.Surname
+			}
+
+			return true
+		}
+	}
+	return false
+}
