@@ -9,7 +9,7 @@ import (
 )
 
 func ErrorCode(w http.ResponseWriter, err error, status int) {
-	JSON(w, &errors.Error{Message: err.Error()}, status)
+	JSON(w, &errors.Error{Code: status, Message: err.Error(), Success: false}, status)
 }
 
 func InternalError(w http.ResponseWriter, err error) {

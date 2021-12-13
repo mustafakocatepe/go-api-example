@@ -8,7 +8,3 @@ type User struct {
 	Surname  string `json:"surname"`
 	IsActive bool   `json:"isactive"`
 }
-
-type Users struct {
-	Users []User `json:"users"`
-}

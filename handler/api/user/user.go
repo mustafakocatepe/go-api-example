@@ -4,18 +4,18 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/mustafakocatepe/go-api-example/handler/api/errors"
 	"github.com/mustafakocatepe/go-api-example/handler/render"
 	"github.com/mustafakocatepe/go-api-example/model"
+	userService "github.com/mustafakocatepe/go-api-example/service/user"
 )
 
 func HandleUsers(us model.User) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		users, result := GetUsers(model.UserArray)
+		users, result := userService.GetUsers(model.UserArray)
 		if !result {
 			render.NotFound(w, errors.New("Kullanici bulunamadi"))
 			return
@@ -46,7 +46,7 @@ func HandleUser(us model.User) http.HandlerFunc {
 
 		users := model.UserArray
 
-		user, found := GetUserByUserName(users, userName)
+		user, found := userService.GetUserByUserName(users, userName)
 		if !found {
 			render.NotFound(w, errors.New("Kullanici bulunamadi"))
 			return
@@ -82,7 +82,7 @@ func HandleCreateUser(us model.User) http.HandlerFunc {
 
 		model.UserArray = append(model.UserArray, user)
 
-		render.JSON(w, model.UserArray, http.StatusCreated)
+		render.JSON(w, user, http.StatusCreated)
 	}
 }
 
@@ -98,43 +98,50 @@ func HandleDelete(us model.User) http.HandlerFunc {
 
 		users := model.UserArray
 
-		result := DeleteUserByUserId(users, id)
+		result := userService.DeleteUserByUserId(users, id)
 
 		if !result {
 			render.NotFound(w, errors.New("Kullanici bulunamadi"))
 			return
 		}
 
-		render.JSON(w, model.UserArray, http.StatusOK) //TODO: DEGISTIR
+		render.JSON(w, "", http.StatusNoContent)
 
 	}
 }
 
-//-----------------------------------------------------
-func GetUserByUserName(slice []model.User, val string) (*model.User, bool) {
-	for _, item := range slice {
-		if item.UserName == val {
-			return &item, true
+func HandleUpdateUserName(us model.User) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		id := chi.URLParam(r, "id")
+
+		if len(id) == 0 {
+			render.BadRequest(w, errors.New(""))
+			return
 		}
-	}
-	return nil, false
-}
-func GetUsers(slice []model.User) ([]model.User, bool) {
-	var responseModel []model.User
-	for _, item := range slice {
-		if item.IsActive {
-			responseModel = append(responseModel, item)
+
+		var req updateUserRequest
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			render.BadRequest(w, err)
+			return
 		}
-	}
-	return responseModel, true
-}
-func DeleteUserByUserId(slice []model.User, val string) bool {
-	for i, item := range slice {
-		value, _ := strconv.Atoi(val)
-		if item.UserId == value && item.IsActive {
-			(model.UserArray[i]).IsActive = false
-			return true
+		defer r.Body.Close()
+
+		if err := json.Unmarshal(body, &req); err != nil {
+			render.BadRequest(w, err)
+			return
 		}
+
+		users := model.UserArray
+
+		result := userService.UpdateUserNameByUserId(users, id, req.Username)
+
+		if !result {
+			render.NotFound(w, errors.New("Kullanici bulunamadi"))
+			return
+		}
+
+		render.JSON(w, "", http.StatusNoContent)
 	}
-	return false
 }
